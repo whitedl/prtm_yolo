@@ -1,0 +1,173 @@
+---
+title: "Yolo Analysis"
+author: "David L. White"
+date: "`r format(Sys.time(), '%X, %Y-%m-%d')`"
+output:
+  html_document: default
+  pdf_document: default
+fig_width: 8 
+fig_height: 8
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+&nbsp;
+&nbsp;
+<p>
+<div style='font-size: 14px;', >
+This document contains an analysis of the Lake Anna Beach and detections datasets. It includes data merging, aggregation, and linear regression analysis.
+</p>
+<br>
+GitHub Repository: <a href="https://github.com/whitedl/prtm_yolo" target="_blank">https://github.com/whitedl/prtm_yolo</a>
+
+</br>
+</div>
+
+```{r, Load_Pachages, echo=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(broom)  # For tidying model output
+```
+
+
+```{r, Read_Data, echo=FALSE, message=FALSE}
+lake_anna_beach <- read_csv("~/Yolo_Code/prtm_yolo/datasets/Lake_Anna_Beach/Lake_Anna_Beach.csv")
+detections <- read_csv("~/Yolo_Code/prtm_yolo/Code/detections_pivot_sum_by_class_beach.csv")
+```
+
+
+&nbsp;
+&nbsp;
+<p>
+<div style='font-size: 14px;', >
+Table X. Input Lake Anna Count Data
+</div>
+<div style="overflow-y: scroll; height: 300px; width: 900px">
+```{r, Print_Count_Data, echo=FALSE, message=FALSE}
+# Display the table
+knitr::kable(lake_anna_beach, caption = "")
+```
+</div>
+</p>
+
+
+&nbsp;
+&nbsp;
+&nbsp;
+<p>
+<div style='font-size: 14px;', >
+Table X. Yolo Detection Data
+</div>
+<div style="overflow-y: scroll; height: 300px; width: 900px">
+```{r, Print_Detection_Data, echo=FALSE, message=FALSE}
+# Display the table
+knitr::kable(detections, caption = "")
+
+```
+</div>
+</p>
+
+
+&nbsp;
+&nbsp;
+
+```{r, Merge_Data, echo=FALSE, message=FALSE}
+merged_data <- lake_anna_beach %>%
+  inner_join(detections, by = c("File" = "filename"))
+
+```
+&nbsp;
+&nbsp;
+<p>
+<div style='font-size: 14px;', >
+Table X. Merged Data with Counter Sum and Detection Sum (Human + People)
+</div>
+<div style="overflow-y: scroll; height: 300px; width: 900px">
+```{r, Sum_Data, echo=FALSE, message=FALSE}
+merged_data <- merged_data %>%
+  mutate(Counter_sum = Counter0 + Counter1 + Counter2 + Counter3 + Counter4)
+merged_data$Sum_Humans_People <- merged_data$Human + merged_data$People
+knitr::kable(merged_data, caption = "")
+```
+</div>
+</p>
+
+
+&nbsp;
+&nbsp;
+<p>
+<div style='font-size: 14px;'>
+Figure X. Time Series Counts and Detections
+```{r, Plot_Data, echo=FALSE, message=FALSE}
+merged_data$DateTime <- as.POSIXct(merged_data$DateTime, format="%Y-%m-%d %H:%M:%S")
+
+ggplot(merged_data, aes(x = DateTime)) +
+  geom_line(aes(y = Counter_sum, color = "Counters_People")) +
+  geom_line(aes(y = Boat, color = "Boat")) +
+  geom_line(aes(y = Human, color = "Human")) +
+  geom_line(aes(y = People, color = "People")) +
+  geom_line(aes(y = Sum_Humans_People, color = "Humans + People")) +
+  labs(title = "",
+       x = "DateTime",
+       y = "Counts") +
+  scale_color_manual(values = c("Counters_People" = "blue", "Boat" = "red", "Human" = "green", "People" = "purple", "Humans + People" = "black")) +
+  theme_minimal()
+```
+</div>
+</p>
+
+
+&nbsp;
+&nbsp;
+```{r, Linear_Regression, echo=FALSE, message=FALSE}
+lm_sum <- lm(Sum_Humans_People ~ Counter_sum, data = merged_data)
+# summary(lm_sum)
+```
+
+
+<p>
+<div style='font-size: 14px;'>
+Table X. Summary of Linear Regression Model with R-squared and Adjusted R-squared
+```{r, Linear_Regression_Summary_Table, echo=FALSE, message=FALSE}
+# Tidy the model summary
+lm_sum_tidy <- broom::tidy(lm_sum)
+
+# Extract R-squared and Adjusted R-squared values
+model_summary <- summary(lm_sum)
+r_squared <- model_summary$r.squared
+adj_r_squared <- model_summary$adj.r.squared
+
+# Add R-squared and Adjusted R-squared to the tidy data frame
+lm_sum_tidy <- lm_sum_tidy %>%
+  add_row(term = "R-squared", estimate = r_squared, std.error = NA, statistic = NA, p.value = NA) %>%
+  add_row(term = "Adjusted R-squared", estimate = adj_r_squared, std.error = NA, statistic = NA, p.value = NA)
+
+# Display the table
+knitr::kable(lm_sum_tidy, caption = "")
+
+```
+</div>
+</p>
+
+&nbsp;
+&nbsp;
+<p>
+<div style='font-size: 14px;'>
+Figure X. Linear Regression of Sum of Humans and People on Counter_sum
+```{r, Plot_Linear_Regression, echo=FALSE, message=FALSE}
+ggplot(merged_data, aes(x = Counter_sum, y = Sum_Humans_People)) +
+  geom_point(color = "blue") +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  labs(title = "",
+       x = "Counter_sum",
+       y = "Sum of Humans and People") +
+  theme_minimal()
+```
+</div>
+</p>
