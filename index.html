@@ -15,7 +15,11 @@
 <h1>Park visitation using machine learning</h1>
 
 <h2>Project Description</h2>
-<p>This project leveraged computer vision to estimate park visitation patterns over time. We used You Only Look Once (YOLO) object detection models to identify and count individuals in frame grabs extracted from surveillance and trail cameras. Analysts applied YOLO to batches of images representing different time intervals (hourly, daily, seasonal) to quantify park usage and identify peak visitation periods. The output informed staffing decisions, infrastructure planning, and recreational management.</p>
+<p>This project leveraged computer vision to estimate park visitation patterns over time. We used You Only Look Once (YOLO) object detection models to identify and count individuals in frame grabs extracted 
+from surveillance and trail cameras. Analysts processed batches of images representing different time intervals—hourly, daily, and seasonal—to quantify park usage and identify peak visitation periods. 
+The resulting insights supported decisions around staffing, infrastructure planning, and recreational management. The images below compare results from 
+the default YOLO pre-trained model and a custom Roboflow-trained model, which used image annotation and targeted training to significantly improve detection accuracy.
+</p>
 <ul>
 <li><strong>YOLO Object Detection:</strong> Trained and deployed YOLOv5 for accurate person detection in varied outdoor lighting and seasonal conditions.</li>
 <li><strong>Video Processing:</strong> Extracted still frames from video footage using FFmpeg and Python-based scripts, ensuring representative sampling across time.</li>
@@ -27,12 +31,12 @@
 
 <figure style="display: inline-block; width: 45%; margin: 10px;">
   <img src="picnic_old_1.png" alt="Picnic Old 1" style="width: 100%;">
-  <figcaption style="text-align: center; font-style: italic;">YOLO Default Trained Model - Image 1</figcaption>
+  <figcaption style="text-align: center; font-style: italic;">YOLO Pre-Trained Model - Image 1</figcaption>
 </figure>
 
 <figure style="display: inline-block; width: 45%; margin: 10px;">
   <img src="picnic_old_2.png" alt="Picnic Old 2" style="width: 100%;">
-  <figcaption style="text-align: center; font-style: italic;">YOLO Default Trained Model - Image 2</figcaption>
+  <figcaption style="text-align: center; font-style: italic;">YOLO Pre-Trained Model - Image 2</figcaption>
 </figure>
 
 <figure style="display: inline-block; width: 45%; margin: 10px;">
